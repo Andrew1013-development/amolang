@@ -1,0 +1,3 @@
+void shit() {
+    printf("hello from other.amo");
+}

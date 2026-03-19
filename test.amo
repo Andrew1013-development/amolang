@@ -1,0 +1,11 @@
+// comment
+
+#include "other.amo"
+#define TEST 15
+
+int main() {
+    int a = 16;
+    int b = TEST - 1;
+    printf("this is a test");
+    return 0;
+}
