@@ -3,4 +3,4 @@
 
 char* preprocess(const char* filename);
 
-#endif
+#endif // PREPROCESSOR_H

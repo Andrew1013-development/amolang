@@ -57,6 +57,8 @@ static TokenType _word_type(Lexer* lexer) {
         case 3:
             if (strncmp(lexer->start, "int", 3)) return KW_INT;
             break;
+        case 4:
+            if (strncmp(lexer->start, "void", 4)) return KW_VOID;
         case 6:
             if (strncmp(lexer->start, "return", 6)) return KW_RETURN;
             if (strncmp(lexer->start, "string", 6)) return KW_STRING;
@@ -114,6 +116,7 @@ Token next_token(Lexer* lexer) {
         case '{': return _make_token(lexer, PUNC_LBRACE);
         case '}': return _make_token(lexer, PUNC_RBRACE);
         case ';': return _make_token(lexer, PUNC_SEMICOLON);
+        case ':': return _make_token(lexer ,PUNC_COLON);
         // operator
         case '+': return _make_token(lexer, OP_ADD);
         case '-': return _make_token(lexer, OP_SUBTRACT);
@@ -126,7 +129,6 @@ Token next_token(Lexer* lexer) {
         case '^': return _make_token(lexer, OP_XOR);
         case '!': return _make_token(lexer, OP_NOT);
         // ???
-        case '#': return _make_token(lexer, TOK_NOP);
         case '"': return _string(lexer);
     }
     return _make_token(lexer, TOK_ERROR);

@@ -6,7 +6,7 @@ typedef enum {
     PUNC_LBRACE, PUNC_RBRACE, // {}
     PUNC_LBRACKET, PUNC_RBRACKET, // []
     PUNC_LPAREN, PUNC_RPAREN, // ()
-    PUNC_SEMICOLON, // ;
+    PUNC_SEMICOLON, PUNC_COLON, // ;,
 
     // operator
     OP_ADD, OP_SUBTRACT, OP_MULTIPLY, OP_DIVIDE, OP_MODULO, // math
@@ -14,11 +14,11 @@ typedef enum {
     OP_ASSIGN, // =
 
     // keyword
-    KW_INT, KW_STRING, // data types
+    KW_INT, KW_STRING, KW_VOID, // data types
     KW_RETURN,
 
     // literals
-    LIT_NUMBER, LIT_STRING,
+    LIT_NUMBER, LIT_STRING, // data types
 
     // other
     TOK_IDENTIFIER, TOK_EOF, TOK_ERROR,
@@ -39,4 +39,4 @@ typedef struct {
 void init_lexer(Lexer* lexer, char* src);
 Token next_token(Lexer* lexer);
 
-#endif
+#endif // LEXER_H
