@@ -4,12 +4,13 @@
 #include <string.h>
 
 #include "stringbuilder.h"
+#include "memory.h"
 
 #define SIZE_BUFFER 1024
 // ===== PUBLIC API =====
 void init_sb(StringBuilder *sb) {
     // allocate memory
-    sb->buffer = calloc(SIZE_BUFFER, sizeof(char));
+    sb->buffer = calloc_s(SIZE_BUFFER, sizeof(char));
     sb->buffer[0] = '\0';
 
     // setup aux data
@@ -17,7 +18,7 @@ void init_sb(StringBuilder *sb) {
     sb->capacity = SIZE_BUFFER; // NOTE: DOES INCLUDE NULL TERMINATOR
 }
 void free_sb(StringBuilder *sb) {
-    free(sb->buffer);
+    free_s(sb->buffer);
     sb->buffer = NULL;
     sb->length = sb->capacity = 0;
 }
@@ -35,7 +36,7 @@ static void _check_allocate(StringBuilder *sb, size_t length) {
 
     while (length > sb->capacity)
         sb->capacity *= 2; // geometric growth for amortized O(1) time
-    sb->buffer = realloc(sb->buffer, sb->capacity);
+    sb->buffer = realloc_s(sb->buffer, sb->capacity);
 }
 
 // ===== STRING FUNCTIONS =====

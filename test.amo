@@ -1,7 +1,7 @@
 // comment
 
-#include "other.amo"
-#include "other2.amo"
+//#include "other.amo"
+//#include "other2.amo"
 #define TEST 15
 
 int main() {

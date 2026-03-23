@@ -1,0 +1,40 @@
+Program
+    [Stmt]
+
+// Statement
+VarDeclStmt - int a = 3
+    (KW_INT | KW_STRING)
+    TOK_IDENTIFIER
+    Expr
+VarAssignStmt - b = 6
+    TOK_IDENTIFER
+    Expr
+BlockStmt
+    [Stmt]
+FuncDeclStmt - int amogus()
+    (KW_INT | KW_STRING | KW_VOID)
+    TOK_IDENTIFIER
+    [FuncArg]
+    BlockStmt
+ReturnStmt - return 3;
+    Expr
+ExprStmt
+    Expr
+
+// Expression (Expr)
+BinaryExpr
+    Expr
+    (OP_ADD | OP_SUBTRACT | OP_MULTIPLY | OP_DIVIDE | OP_MODULO | OP_AND | OP_OR | OP_XOR)
+    Expr
+UnaryExpr
+    (OP_NOT)
+    Expr
+IdentifierExpr
+    TOK_IDENTIFIER
+FuncExpr
+    TOK_IDENTIFER
+    [Expr]
+IntLiteral
+    LIT_NUMBER
+StringLiteral
+    LIT_STRING

@@ -4,25 +4,29 @@
 #include "utils.h"
 #include "preprocessor.h"
 #include "lexer.h"
+#include "memory.h"
+#include "parser.h"
 
 int main(int argc, char** argv) {
     Lexer lexer;
-    Token token;
     char* buf;
+    Parser parser;
+    Program *program;
 
     if (argc != 2) exit_with_error("incorrect number of arguments", 1);
 
     // preprocessing
     buf = preprocess(argv[1]);
 
-    // lexical analysis
+    // lexical analysis + parsing
     init_lexer(&lexer, buf);
-    do {
-        token = next_token(&lexer);
-        print_token(token);
-    } while (token.type != TOK_EOF && token.type != TOK_ERROR);
+    init_parser(&parser, &lexer);
+    program = parse(&parser);
+    print_program(program);
+
+    // codegen
 
     // cleanup
-    free(buf);
+    free_s(buf);
     return 0;
 }

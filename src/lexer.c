@@ -5,9 +5,57 @@
 
 #include "lexer.h"
 
+static const char* _tokentype_to_string(TokenType type) {
+    switch (type) {
+        // punctuators
+        case PUNC_LBRACE: return "PUNC_LBRACE";
+        case PUNC_RBRACE: return "PUNC_RBRACE";
+        case PUNC_LBRACKET: return "PUNC_LBRACKET";
+        case PUNC_RBRACKET: return "PUNC_RBRACKET";
+        case PUNC_LPAREN: return "PUNC_LPAREN";
+        case PUNC_RPAREN: return "PUNC_RPAREN";
+        case PUNC_SEMICOLON: return "PUNC_SEMICOLON";
+        case PUNC_COLON: return "PUNC_COLON";
+        case PUNC_COMMA: return "PUNC_COMMA";
+        // operators
+        case OP_ADD: return "OP_ADD";
+        case OP_SUBTRACT: return "OP_SUBTRACT";
+        case OP_MULTIPLY: return "OP_MULTIPLY";
+        case OP_DIVIDE: return "OP_DIVIDE";
+        case OP_MODULO: return "OP_MODULO";
+        case OP_AND: return "OP_AND";
+        case OP_OR: return "OP_OR";
+        case OP_XOR: return "OP_XOR";
+        case OP_NOT: return "OP_NOT";
+        case OP_ASSIGN: return "OP_ASSIGN";
+        // keywords
+        case KW_INT: return "KW_INT";
+        case KW_FLOAT: return "KW_FLOAT";
+        case KW_STRING: return "KW_STRING";
+        case KW_VOID: return "KW_VOID";
+        case KW_RETURN: return "KW_RETURN";
+        // literals
+        case LIT_INTEGER: return "LIT_INTEGER";
+        case LIT_FLOAT: return "LIT_FLOAT";
+        case LIT_STRING: return "LIT_STRING";
+        // others
+        case TOK_IDENTIFIER: return "TOK_IDENTIFIER";
+        case TOK_EOF: return "TOK_EOF";
+        case TOK_ERROR: return "TOK_ERROR";
+        case TOK_NOP: return "TOK_NOP";
+        default: return "unknown";
+    }
+}
+
 // ===== PUBLIC API =====
+char *token_to_string(Token token) {
+    char name[token.length];
+
+    sprintf(name, "%.*s", token.length, token.start);
+    return name;
+}
 void print_token(Token token) {
-   printf("'%.*s' (type %d) @ line %d\n", token.length, token.start, token.type, token.line);
+   printf("'%.*s' (type %s) @ line %d\n", token.length, token.start, _tokentype_to_string(token.type), token.line);
 }
 void init_lexer(Lexer* lexer, char* src) {
     lexer->start = lexer->current = src;
@@ -55,13 +103,14 @@ static void _skip(Lexer* lexer) {
 static TokenType _word_type(Lexer* lexer) {
     switch ((int)(lexer->current - lexer->start)) {
         case 3:
-            if (strncmp(lexer->start, "int", 3)) return KW_INT;
+            if (strncmp(lexer->start, "int", 3) == 0) return KW_INT;
             break;
         case 4:
-            if (strncmp(lexer->start, "void", 4)) return KW_VOID;
+            if (strncmp(lexer->start, "void", 4) == 0) return KW_VOID;
+            break;
         case 6:
-            if (strncmp(lexer->start, "return", 6)) return KW_RETURN;
-            if (strncmp(lexer->start, "string", 6)) return KW_STRING;
+            if (strncmp(lexer->start, "return", 6) == 0) return KW_RETURN;
+            if (strncmp(lexer->start, "string", 6) == 0) return KW_STRING;
             break;
     }
     return TOK_IDENTIFIER;
@@ -86,7 +135,7 @@ static Token _number(Lexer* lexer) {
     while (isdigit(_peek(lexer, 0)))
         _consume(lexer);
 
-    return _make_token(lexer, LIT_NUMBER);
+    return _make_token(lexer, LIT_INTEGER);
 }
 static Token _string(Lexer* lexer) {
     while (isascii(_peek(lexer, 0)) && _peek(lexer, 0) != '"')
@@ -116,7 +165,8 @@ Token next_token(Lexer* lexer) {
         case '{': return _make_token(lexer, PUNC_LBRACE);
         case '}': return _make_token(lexer, PUNC_RBRACE);
         case ';': return _make_token(lexer, PUNC_SEMICOLON);
-        case ':': return _make_token(lexer ,PUNC_COLON);
+        case ':': return _make_token(lexer, PUNC_COLON);
+        case ',': return _make_token(lexer ,PUNC_COMMA);
         // operator
         case '+': return _make_token(lexer, OP_ADD);
         case '-': return _make_token(lexer, OP_SUBTRACT);
@@ -131,5 +181,5 @@ Token next_token(Lexer* lexer) {
         // ???
         case '"': return _string(lexer);
     }
-    return _make_token(lexer, TOK_ERROR);
+    return _make_token(lexer, TOK_EOF);
 }

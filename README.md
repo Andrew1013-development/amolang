@@ -15,12 +15,21 @@ An experimental programming language started as a hobby project to learn about c
 ### Syntax
 The entry point to all Amolang programs is the `int main()` function
 
-Declaring variables
+Directives
+- `#include`: include code from another file
+- `#define`: define a constant
+```
+#include "fib.amo"
+#define SIZE_BUFFER 15
+```
+
+Variables
 ```
 int i = 15;
 string s = "this is a test";
 ```
-Writing functions
+
+Functions
 ```
 int foo() {
     printf(3);
@@ -31,6 +40,7 @@ void bar() {
     printf("hello");
 }
 ```
+
 Comments
 ```
 // random comment goes here
@@ -77,6 +87,7 @@ Phase 2: An Actual Programming Language
 
 ## Special Thanks
 These videos inspired me to tackle this project, even if some of them falls under different categories from compiler design:
-- [How do computers read code? - Frame of Essence](https://www.youtube.com/watch?v=QXjU9qTsYCc)
-- [I made an entire OS that only runs Tetris - jdh](https://www.youtube.com/watch?v=FaILnmUYS_U)
-- [I designed my own 8-bit computer just to play PONG - jdh](https://www.youtube.com/watch?v=7A1SzIIKMho)
+- [How do computers read code? - Frame of Essence (YouTube)](https://www.youtube.com/watch?v=QXjU9qTsYCc)
+- [phi - wzid (GitHub)](https://github.com/wzid/phi)
+- [I made an entire OS that only runs Tetris - jdh (YouTube)](https://www.youtube.com/watch?v=FaILnmUYS_U)
+- [I designed my own 8-bit computer just to play PONG - jdh (YouTube)](https://www.youtube.com/watch?v=7A1SzIIKMho)
