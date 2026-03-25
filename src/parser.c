@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "lexer.h"
 #include "parser.h"
@@ -26,7 +27,7 @@ static void _consume(Parser *parser) {
 // check if lookahead is of expected type
 static bool _check(Parser *parser, TokenType type) {
     if (parser->lookahead.type != type) {
-        exit_with_error("unexpected token", 6);
+        exit_with_error("mismatched token", 8);
         return false;
     }
     return true;
@@ -39,13 +40,84 @@ static bool _match(Parser *parser, TokenType type) {
     }
     return false;
 }
-// TODO: implement parsing function declarations later
+
+// function declaration: [type] [identifier] ([type] [identifier],...) { [statement], ... }
+static FuncArg *_parse_func_args(Parser *parser, FuncArg *args, size_t *count, size_t *capacity) {
+    TokenType type;
+    char *name;
+
+    // initial capacity
+    *count = 0;
+    *capacity = 8;
+    args = calloc_s(*capacity, sizeof(FuncArg));
+
+    while (_peek(parser).type != PUNC_RPAREN && _peek(parser).type != TOK_EOF) {
+        do {
+            switch (_peek(parser).type) {
+                case KW_INT:
+                case KW_FLOAT:
+                case KW_STRING:
+                    // parse arg type
+                    type = _peek(parser).type;
+                    _consume(parser);
+                    // parse arg name
+                    name = token_to_string(_peek(parser));
+                    _consume(parser);
+
+                    if (*count >= *capacity) {
+                        *capacity *= 2;
+                        args = realloc_s(args, *capacity * sizeof(FuncArg));
+                    }
+
+                    args[*count].type = type;
+                    args[*count].name = name;
+                    (*count)++;
+                    break;
+                default:
+                    exit_with_error("function argument has invalid or no type", 9);
+            }
+        } while (_match(parser, PUNC_COMMA));
+    }
+    return args;
+}
+static Stmt *_parse_func_decl(Parser *parser, TokenType type, char *name) {
+    FuncArg *args;
+    size_t count, capacity;
+
+    // parse function arguments
+    _consume(parser); // consume PUNC_LPAREN
+    args = _parse_func_args(parser, args, &count, &capacity);
+    _consume(parser); // consume PUNC_RPAREN
+
+    // TODO: parse function body
+    _consume(parser); // consume PUNC_LBRACE
+    while (_peek(parser).type != PUNC_RBRACE && _peek(parser).type != TOK_EOF) _consume(parser);
+    _consume(parser); // consume PUNC_RBRACE
+
+    return func_decl(type, name, args, count, capacity, NULL);
+}
+// variable declaration: [type] [identifier] = [expression]
+static Stmt *_parse_var_decl(Parser *parser, TokenType type, char *name) {
+    Expr *expr;
+
+    _consume(parser); // consume identifier
+    _consume(parser); // consume OP_ASSIGN
+
+    // TODO: parse expression
+    expr = int_literal(16);
+    while (_peek(parser).type != PUNC_SEMICOLON) _consume(parser);
+
+    _check(parser, PUNC_SEMICOLON);
+    _consume(parser);
+
+    return var_decl(type, name, expr);
+}
 static Stmt *_parse_decl(Parser *parser, TokenType type) {
     char *name;
 
-    _consume(parser);
+    _consume(parser); // consume type token
 
-    // next token after type must be identifier
+    // parse identifier value
     _check(parser, TOK_IDENTIFIER);
     _consume(parser);
     name = token_to_string(parser->current);
@@ -53,38 +125,20 @@ static Stmt *_parse_decl(Parser *parser, TokenType type) {
     switch (_peek(parser).type) {
         case PUNC_LPAREN:
             // function declaration
-            _consume(parser);
-
-            while (_peek(parser).type != PUNC_RPAREN) // TODO: replace this with parse function arguments
-                _consume(parser);
-
-            // check for proper opening of function body
-            _check(parser, PUNC_LBRACE);
-            _consume(parser);
-
-            // TODO: parse statements within function
-
-            return func_decl(type, name, NULL, 0, 0, NULL);
+            return _parse_func_decl(parser, type, name);
         case OP_ASSIGN:
-            // variable declaration with value
-            _consume(parser); // eat =
-
-            _consume(parser); // TODO: replace this with _parse_expr()
-
-            // check for proper semicolon ending
-            _check(parser, PUNC_SEMICOLON);
-            _consume(parser);
-
-            return var_decl(type, name, int_literal(16));
+            // variable declaration with initial value
+            return _parse_var_decl(parser, type, name);
         case PUNC_SEMICOLON:
-            // variable declaration without value
-            _consume(parser); // eat ;
-
+            // variable declaration without initial value
             return var_decl(type, name, NULL);
         default:
-            exit_with_error("declaration syntax error", 7);
+            print_token(_peek(parser));
+            exit_with_error("declaration error", 7);
     }
 }
+
+// add statement to program
 static void _add_statement(Program *prog, Stmt *stmt) {
     if (prog->count >= prog->capacity) {
         prog->statements = realloc_s(prog->statements, prog->capacity * 2 * sizeof(Stmt*));
@@ -95,14 +149,14 @@ static void _add_statement(Program *prog, Stmt *stmt) {
 
 // what the fuck is this
 Program *parse(Parser* parser) {
-    Program* prog = calloc_s(1, sizeof(Program));
-    prog->count = 0;
-    prog->capacity = 8;
-    prog->statements = calloc_s(prog->capacity, sizeof(Stmt*));
+    Program *prog = calloc_s(1, sizeof(Program));
+    Stmt *stmt;
+
+    init_program(prog);
 
     while (_peek(parser).type != TOK_EOF && _peek(parser).type != TOK_ERROR) {
-        Stmt *stmt = NULL;
-        switch (parser->lookahead.type) {
+        stmt = NULL;
+        switch (_peek(parser).type) {
             case KW_INT:
             case KW_FLOAT:
             case KW_STRING:
@@ -110,8 +164,8 @@ Program *parse(Parser* parser) {
                 stmt = _parse_decl(parser, _peek(parser).type);
                 break;
             default:
+                print_token(_peek(parser));
                 exit_with_error("unexpected token", 6);
-                break;
         }
         _add_statement(prog, stmt);
     }

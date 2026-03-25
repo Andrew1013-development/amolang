@@ -15,6 +15,8 @@ typedef struct {
     TokenType type;
     char *name;
 } FuncArg;
+FuncArg *func_arg(TokenType type, char *name);
+char *func_args_to_string(FuncArg *arg, size_t count);
 
 // expressions
 typedef enum {
@@ -68,7 +70,7 @@ Expr *identifier(char *name);
 Expr *func_call(char *name, Expr **args, size_t count, size_t capacity);
 Expr *int_literal(int value);
 Expr *string_literal(char *name);
-void print_expression(Expr* expr);
+char *expr_to_string(Expr* expr);
 
 // statements
 typedef enum {
@@ -133,6 +135,7 @@ typedef struct {
     size_t count;
     size_t capacity;
 } Program;
+void init_program(Program *prog);
 void print_program(Program *prog);
-
+//void free_program(Program *prog);
 #endif // AST_H

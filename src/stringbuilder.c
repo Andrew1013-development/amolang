@@ -23,6 +23,7 @@ void free_sb(StringBuilder *sb) {
     sb->length = sb->capacity = 0;
 }
 void debug_sb(StringBuilder *sb) {
+    printf("===== STRING DETAILS =====\n");
     printf("length: %zu, capacity: %zu\n", sb->length, sb->capacity);
     printf("===== START OF STRING CONTENT =====\n");
     printf("%s\n", sb->buffer);

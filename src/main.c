@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "memory.h"
 #include "parser.h"
+#include "info.h"
 
 int main(int argc, char** argv) {
     Lexer lexer;
@@ -13,7 +14,10 @@ int main(int argc, char** argv) {
     Parser parser;
     Program *program;
 
-    if (argc != 2) exit_with_error("incorrect number of arguments", 1);
+    printf("amocc %s\n", VERSION);
+    printf("%s\n", COPYRIGHT);
+    if (argc != 2)
+        exit_with_error("incorrect number of arguments", 1);
 
     // preprocessing
     buf = preprocess(argv[1]);
@@ -28,5 +32,6 @@ int main(int argc, char** argv) {
 
     // cleanup
     free_s(buf);
+    //free_program(program);
     return 0;
 }

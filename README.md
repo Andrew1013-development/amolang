@@ -91,3 +91,8 @@ These videos inspired me to tackle this project, even if some of them falls unde
 - [phi - wzid (GitHub)](https://github.com/wzid/phi)
 - [I made an entire OS that only runs Tetris - jdh (YouTube)](https://www.youtube.com/watch?v=FaILnmUYS_U)
 - [I designed my own 8-bit computer just to play PONG - jdh (YouTube)](https://www.youtube.com/watch?v=7A1SzIIKMho)
+- [I made a C compiler in C - lolzdev (YouTube)](https://www.youtube.com/watch?v=UW8LgC-S_co)
+
+## Additional Documentation
+1. [Amolang Cross Compiler](./docs/amocc.md)
+2. [The Amolang Programming Language](./docs/language.md)

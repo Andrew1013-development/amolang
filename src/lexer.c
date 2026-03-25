@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "lexer.h"
+#include "memory.h"
 
 static const char* _tokentype_to_string(TokenType type) {
     switch (type) {
@@ -49,7 +50,7 @@ static const char* _tokentype_to_string(TokenType type) {
 
 // ===== PUBLIC API =====
 char *token_to_string(Token token) {
-    char name[token.length];
+    char *name = calloc_s(token.length, sizeof(char));
 
     sprintf(name, "%.*s", token.length, token.start);
     return name;

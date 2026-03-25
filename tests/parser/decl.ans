@@ -1,0 +1,4 @@
+VarDecl(int, SIZE, IntLiteral(16))
+FuncDecl(int, square, [FuncArg(int, n), ], 1, 8)
+FuncDecl(string, dog2, [FuncArg(string, su), FuncArg(string, si), FuncArg(string, trum), ], 3, 8)
+FuncDecl(int, main, [], 0, 8)
