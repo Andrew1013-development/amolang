@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 
@@ -7,6 +8,11 @@
 #include "memory.h"
 #include "utils.h"
 #include "ast.h"
+
+// FORWARD DECLARATIONS
+static Expr *_parse_expression(Parser *parser, double precedence);
+static Expr *_parse_prefix(Parser *parser, Token token);
+static Expr *_parse_infix(Parser *parser, Expr *left, TokenType op);
 
 // ===== PUBLIC APIS =====
 void init_parser(Parser *parser, Lexer *lexer) {
@@ -27,6 +33,7 @@ static void _consume(Parser *parser) {
 // check if lookahead is of expected type
 static bool _check(Parser *parser, TokenType type) {
     if (parser->lookahead.type != type) {
+        print_token(parser->lookahead);
         exit_with_error("mismatched token", 8);
         return false;
     }
@@ -40,8 +47,52 @@ static bool _match(Parser *parser, TokenType type) {
     }
     return false;
 }
+/// get ready: a lot of very messy parsing code will follow this comment.
+/// you have been warned.
+/// [please just end my misery already]
+// parse expression with right-side priority -> parse right side then merge to left side
+static Expr *_parse_expression(Parser *parser, double precedence) {
+    Expr *left;
+    TokenType op;
 
-// function declaration: [type] [identifier] ([type] [identifier],...) { [statement], ... }
+    left = _parse_prefix(parser, _peek(parser));
+    _consume(parser);
+    //while (_peek(parser).type != PUNC_SEMICOLON) _consume(parser);
+    while (precedence < op_precedence(_peek(parser).type, false)) {
+        op = _peek(parser).type;
+        _consume(parser);
+        left = _parse_infix(parser, left, op);
+    }
+    return left;
+}
+// parse prefix (any element before operation)
+static Expr *_parse_prefix(Parser *parser, Token token) {
+    switch (token.type) {
+        case LIT_INTEGER: return int_literal(atoi(token_to_string(token)));
+        case LIT_STRING: return string_literal(token_to_string(token));
+        case TOK_IDENTIFIER: return identifier(token_to_string(token));
+        default:
+            exit_with_error("expected expression", 11);
+    }
+}
+// parse infix (operation + any element after operation)
+static Expr *_parse_infix(Parser *parser, Expr *left, TokenType op) {
+    Expr *right;
+
+    switch (op) {
+        case OP_ADD:
+        case OP_SUBTRACT:
+        case OP_MULTIPLY:
+        case OP_DIVIDE:
+        case OP_MODULO:
+            right = _parse_expression(parser, op_precedence(op, true));
+            return binary_expr(left, op, right);
+        default:
+            return left;
+    }
+}
+static Stmt *_parse_statement();
+// function argument: [type] [identifier],...
 static FuncArg *_parse_func_args(Parser *parser, FuncArg *args, size_t *count, size_t *capacity) {
     TokenType type;
     char *name;
@@ -57,10 +108,11 @@ static FuncArg *_parse_func_args(Parser *parser, FuncArg *args, size_t *count, s
                 case KW_INT:
                 case KW_FLOAT:
                 case KW_STRING:
-                    // parse arg type
+                    // parse type
                     type = _peek(parser).type;
                     _consume(parser);
-                    // parse arg name
+
+                    // parse name
                     name = token_to_string(_peek(parser));
                     _consume(parser);
 
@@ -80,11 +132,12 @@ static FuncArg *_parse_func_args(Parser *parser, FuncArg *args, size_t *count, s
     }
     return args;
 }
+// function declaration: [type] [identifier] ([function arg],...) { [statement], ... }
 static Stmt *_parse_func_decl(Parser *parser, TokenType type, char *name) {
     FuncArg *args;
+    Expr *expr;
     size_t count, capacity;
 
-    // parse function arguments
     _consume(parser); // consume PUNC_LPAREN
     args = _parse_func_args(parser, args, &count, &capacity);
     _consume(parser); // consume PUNC_RPAREN
@@ -101,18 +154,16 @@ static Stmt *_parse_var_decl(Parser *parser, TokenType type, char *name) {
     Expr *expr;
 
     _consume(parser); // consume identifier
-    _consume(parser); // consume OP_ASSIGN
 
     // TODO: parse expression
-    expr = int_literal(16);
-    while (_peek(parser).type != PUNC_SEMICOLON) _consume(parser);
+    expr = _parse_expression(parser, 0.0);
 
     _check(parser, PUNC_SEMICOLON);
     _consume(parser);
 
     return var_decl(type, name, expr);
 }
-static Stmt *_parse_decl(Parser *parser, TokenType type) {
+static Stmt *_parse_declaration(Parser *parser, TokenType type) {
     char *name;
 
     _consume(parser); // consume type token
@@ -161,7 +212,7 @@ Program *parse(Parser* parser) {
             case KW_FLOAT:
             case KW_STRING:
             case KW_VOID:
-                stmt = _parse_decl(parser, _peek(parser).type);
+                stmt = _parse_declaration(parser, _peek(parser).type);
                 break;
             default:
                 print_token(_peek(parser));

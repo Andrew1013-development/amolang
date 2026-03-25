@@ -2,6 +2,7 @@
 #define AST_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "lexer.h"
 #include "memory.h"
@@ -138,4 +139,7 @@ typedef struct {
 void init_program(Program *prog);
 void print_program(Program *prog);
 //void free_program(Program *prog);
+
+double op_precedence(TokenType op_type, bool rightside);
+
 #endif // AST_H

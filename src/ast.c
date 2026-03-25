@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "ast.h"
 #include "stringbuilder.h"
@@ -10,10 +11,19 @@ static const char* data_type(TokenType type) {
         case KW_FLOAT: return "float";
         case KW_STRING: return "string";
         case KW_VOID: return "void";
-        default: return "unknown";
+        default: return "unknown data type";
     }
 }
-
+static const char* operation_type(TokenType type) {
+    switch (type) {
+        case OP_ADD: return "+";
+        case OP_SUBTRACT: return "-";
+        case OP_MULTIPLY: return "*";
+        case OP_DIVIDE: return "/";
+        case OP_MODULO: return "%";
+        default: return "unknown operation";
+    }
+}
 // function arguments
 FuncArg *func_arg(TokenType type, char *name) {
     FuncArg *arg = malloc_s(sizeof(FuncArg));
@@ -106,11 +116,27 @@ char *expr_to_string(Expr *expr) {
             sprintf(str, "Identifier(%s)", expr->identifier.name);
             break;
         case EXPR_BINARY:
+            sprintf(str,
+                    "BinaryExpr(%s, %s, %s)",
+                    expr_to_string(expr->binary.left),
+                    operation_type(expr->binary.op),
+                    expr_to_string(expr->binary.right)
+            );
+            break;
         case EXPR_UNARY:
+            sprintf(str,
+                    "UnaryExpr(%s, %s)",
+                    operation_type(expr->unary.op),
+                    expr_to_string(expr->unary.right)
+            );
+            break;
         case EXPR_FUNC_CALL:
+            sprintf(str,
+                    "FuncCall(%s)",
+                    expr->func_call.name
+            );
             break;
     }
-
     return str;
 }
 
@@ -215,4 +241,40 @@ void print_program(Program *prog) {
     for (size_t i = 0; i < prog->count; i++)
         print_statement(prog->statements[i]);
     printf("===== END OF PROGRAM CONTENT =====\n");
+}
+
+// in accordance with C/C++ operator precedence
+double op_precedence(TokenType op_type, bool rightside) {
+    double val = 0.0;
+
+    switch (op_type) {
+        case OP_NOT:
+            val = 6.0;
+            break;
+        // multiplicative operators
+        case OP_MULTIPLY:
+        case OP_DIVIDE:
+        case OP_MODULO:
+            val = 5.0;
+            break;
+        // additive operators
+        case OP_ADD:
+        case OP_SUBTRACT:
+            val = 4.0;
+            break;
+        // bitwise operations
+        case OP_AND:
+            val = 3.0;
+            break;
+        case OP_XOR:
+            val = 2.0;
+            break;
+        case OP_OR:
+            val = 1.0;
+            break;
+        default:
+            break;
+    }
+    // use 0.5 to ensure proper comparison in floating point (0.5 = 2^-1)
+    return val + 0.5 * (rightside);
 }
