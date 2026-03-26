@@ -15,7 +15,7 @@ $(TARGET): $(OBJ_FILES) | $(BIN_DIR)
 	$(CC) $(CCFLAGS) $^ -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) $(CCFLAGS) -D IN_DEVELOPMENT -c $< -o $@
 
 $(BIN_DIR) $(OBJ_DIR):
 	mkdir -p $@
@@ -27,16 +27,20 @@ run: $(TARGET)
 # for now fc.exe is usable since development is still on Windows
 test: clean | all
 	@echo "Running tests..."
+	@echo "===== PARSER TESTS ====="
 	@mkdir build\parser
-	./$(TARGET) tests/parser/var_decl.amo
-	#> build/parser/var_decl.out
-	./$(TARGET) tests/parser/func_decl.amo
-	#> build/parser/func_decl.out
-	./$(TARGET) tests/parser/decl.amo
-	#> build/decl.out
-	#@fc.exe build\\decl.out tests\\parser\\var_decl.ans
-	#@fc.exe build\\decl.out tests\\parser\\func_decl.ans
-	#@fc.exe build\\decl.out tests\\parser\\decl.ans
+	./$(TARGET) --debug-parser tests/parser/var_decl.amo > build/parser/var_decl.test
+	./$(TARGET) --debug-parser tests/parser/func_decl.amo > build/parser/func_decl.test
+	./$(TARGET) --debug-parser tests/parser/decl.amo > build/parser/decl.test
+	#@fc.exe build\\parser\\var_decl.test tests\\parser\\var_decl.ans
+	#@fc.exe build\\parser\\func_decl.test tests\\parser\\func_decl.ans
+	#@fc.exe build\\parser\\decl.test tests\\parser\\decl.ans
+	#@echo "===== ARGUMENT TESTS ====="
+	#./$(TARGET) --help
+	#./$(TARGET) --version
+	#./$(TARGET) --debug-preprocessor test.amo
+	#./$(TARGET) --debug-preprocessor --debug-lexer --debug-parser test.amo
+	#-./$(TARGET) --debug-preprocessor --debug-lexer --debug-parser
 	@echo "All tests passed."
 
 clean:

@@ -1,32 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cli.h"
 #include "utils.h"
 #include "preprocessor.h"
 #include "lexer.h"
 #include "memory.h"
 #include "parser.h"
-#include "info.h"
 
 int main(int argc, char** argv) {
+    Configuration config;
     Lexer lexer;
     char* buf;
     Parser parser;
     Program *program;
 
-    printf("amocc %s\n", VERSION);
-    printf("%s\n", COPYRIGHT);
-    if (argc != 2)
-        exit_with_error("incorrect number of arguments", 1);
+    // command-line arguments
+    if (argc < 2)
+        exit_with_error("no arguments specified", 1);
+    parse_args(&config, argc, argv);
+    if (config.verbose)
+        print_config(&config);
 
     // preprocessing
-    buf = preprocess(argv[1]);
+    buf = preprocess(config.input_file, config.debug_preprocessor);
 
     // lexical analysis + parsing
-    init_lexer(&lexer, buf);
-    init_parser(&parser, &lexer);
+    init_lexer(&lexer, buf, config.debug_lexer);
+    init_parser(&parser, &lexer, config.debug_parser);
     program = parse(&parser);
-    print_program(program);
+    if (config.verbose || IN_DEVELOPMENT)
+        print_program(program);
 
     // codegen
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 void exit_with_error(char* message, int code) {
-    fprintf(stderr, "%s\n", message);
+    fprintf(stderr, "Error %d: %s\n", code, message);
     exit(code);
 }
 

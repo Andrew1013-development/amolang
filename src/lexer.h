@@ -29,6 +29,7 @@ typedef struct {
     const char* start; // first character of token
     int length;
     int line;
+    bool debug;
 } Token;
 char *token_to_string(Token token);
 void print_token(Token token);
@@ -36,8 +37,9 @@ typedef struct {
     char* start; // first character of token
     char* current; // current character of token
     int line;
+    bool debug;
 } Lexer;
-void init_lexer(Lexer* lexer, char* src);
+void init_lexer(Lexer* lexer, char* src, bool debug);
 Token next_token(Lexer* lexer);
 
 #endif // LEXER_H

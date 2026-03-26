@@ -15,9 +15,10 @@ static Expr *_parse_prefix(Parser *parser, Token token);
 static Expr *_parse_infix(Parser *parser, Expr *left, TokenType op);
 
 // ===== PUBLIC APIS =====
-void init_parser(Parser *parser, Lexer *lexer) {
+void init_parser(Parser *parser, Lexer *lexer, bool debug) {
     parser->lexer = lexer;
     parser->lookahead = next_token(parser->lexer);
+    parser->debug = debug;
 }
 
 // ===== INTERNAL FUNCTIONS =====
@@ -73,6 +74,7 @@ static Expr *_parse_prefix(Parser *parser, Token token) {
         case TOK_IDENTIFIER: return identifier(token_to_string(token));
         default:
             exit_with_error("expected expression", 11);
+            return NULL;
     }
 }
 // parse infix (operation + any element after operation)
@@ -135,7 +137,6 @@ static FuncArg *_parse_func_args(Parser *parser, FuncArg *args, size_t *count, s
 // function declaration: [type] [identifier] ([function arg],...) { [statement], ... }
 static Stmt *_parse_func_decl(Parser *parser, TokenType type, char *name) {
     FuncArg *args;
-    Expr *expr;
     size_t count, capacity;
 
     _consume(parser); // consume PUNC_LPAREN
@@ -186,6 +187,7 @@ static Stmt *_parse_declaration(Parser *parser, TokenType type) {
         default:
             print_token(_peek(parser));
             exit_with_error("declaration error", 7);
+            return NULL;
     }
 }
 

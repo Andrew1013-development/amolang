@@ -39,13 +39,12 @@ void _add_macro(const char *name, const char *value) {
         strcpy(macros[macros_cnt].name, name);
         strcpy(macros[macros_cnt].value, value);
         macros_cnt++;
-    } else {
+    } else
         exit_with_error("max macros limit reached", 4);
-    }
 }
 
 // process directives -> final source code
-char* preprocess(const char* fname) {
+char* preprocess(const char* fname, bool debug) {
     FILE* fptr;
     StringBuilder sb;
     char line[1024], buf[1024], *ptr, *inc;
@@ -119,8 +118,10 @@ char* preprocess(const char* fname) {
         buflen = 0;
     }
 
-    printf("final source code\n");
-    debug_sb(&sb);
+    if (debug) {
+        printf("final source code\n");
+        debug_sb(&sb);
+    }
     fclose(fptr);
 
     return sb.buffer;

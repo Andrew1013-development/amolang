@@ -58,9 +58,10 @@ char *token_to_string(Token token) {
 void print_token(Token token) {
    printf("'%.*s' (type %s) @ line %d\n", token.length, token.start, _tokentype_to_string(token.type), token.line);
 }
-void init_lexer(Lexer* lexer, char* src) {
+void init_lexer(Lexer* lexer, char* src, bool debug) {
     lexer->start = lexer->current = src;
     lexer->line = 1;
+    lexer->debug = debug;
 }
 
 // ===== INTERNAL FUNCTIONS =====
