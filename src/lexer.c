@@ -3,10 +3,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "lexer.h"
-#include "memory.h"
+#include "../include/lexer.h"
+#include "../include/memory.h"
 
-static const char* _tokentype_to_string(TokenType type) {
+const char* tokentype_to_string(TokenType type) {
     switch (type) {
         // punctuators
         case PUNC_LBRACE: return "PUNC_LBRACE";
@@ -56,7 +56,7 @@ char *token_to_string(Token token) {
     return name;
 }
 void print_token(Token token) {
-   printf("'%.*s' (type %s) @ line %d\n", token.length, token.start, _tokentype_to_string(token.type), token.line);
+   printf("'%.*s' (type %s) @ line %d\n", token.length, token.start, tokentype_to_string(token.type), token.line);
 }
 void init_lexer(Lexer* lexer, char* src, bool debug) {
     lexer->start = lexer->current = src;
@@ -91,8 +91,9 @@ static void _skip(Lexer* lexer) {
                 _consume(lexer);
                 break;
             case '/':
-                if (_peek(lexer, 0) == '/') {
-                    _consume(lexer);
+                if (_peek(lexer, 1) == '/') {
+                    _consume(lexer); // consume first /
+                    _consume(lexer); // consume second /
                     while (_peek(lexer, 0) != '\n') _consume(lexer);
                     break;
                 } else return;
@@ -110,6 +111,8 @@ static TokenType _word_type(Lexer* lexer) {
         case 4:
             if (strncmp(lexer->start, "void", 4) == 0) return KW_VOID;
             break;
+        case 5:
+            if (strncmp(lexer->start, "float", 5) == 0) return KW_FLOAT;
         case 6:
             if (strncmp(lexer->start, "return", 6) == 0) return KW_RETURN;
             if (strncmp(lexer->start, "string", 6) == 0) return KW_STRING;

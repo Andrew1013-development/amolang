@@ -1,0 +1,6 @@
+#include "other4.amo"
+
+int main() {
+    printf(example1());
+    return 0;
+}

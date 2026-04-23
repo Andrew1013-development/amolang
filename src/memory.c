@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "utils.h"
+#include "../include/utils.h"
 
 void *malloc_s(size_t size) {
     void *ptr;

@@ -77,13 +77,50 @@ Build instructions
 No guidelines on how to contribute at this point in time, will update later.
 
 ## Roadmap (subject to change)
-Phase 1: Laying the Foundation
-- If conditionals
-- For, while loops
-- Arrays
+### Language features 
+- [ ] Initial
+    - [ ] Primitive data types (int, float)
+    - [ ] Mathematical operators
+    - [ ] Bitwise operators
+    - [ ] Expression parsing
+- [ ] State and Memory
+    - [ ] Variable declarations
+    - [ ] Variable assignments
+    - [ ] Scoping
+- [ ] Logic and Branching
+    - [ ] Comparison operators
+    - [ ] Logical operators
+    - [ ] If / else statements
+- [ ] Iteration
+    - [ ] For / while loops
+    - [ ] Control transfer (break / continue)
+- [ ] Modularity
+    - [ ] Function declarations + Arguments
+    - [ ] Function calls + Parameters
+    - [ ] Return statements
+- [ ] Extension 1
+    - [ ] Arrays
+    - [ ] Structs
+- [ ] Standard Library
+    - [ ] Standard I/O functions (`printf()`, `scanf()`, etc.)
+    - [ ] File I/O functions (`open()`, `fprintf()`, `fscanf()`, etc.)
+    - [ ] Filesystem operations (`move()`, `copy()`, etc.)
+    - [ ] System functions (`rand()`, `time()`, etc.)
+- [ ] Extension 2
+    - [ ] Error handling
+    - [ ] Memory management
 
-Phase 2: An Actual Programming Language
-- Standard Library
+### Amolang Cross Compiler
+1. Front-end
+- [ ] Preprocessing
+- [ ] Lexical analysis
+- [ ] Parsing
+2. Middle-end
+- [ ] Symbol table
+- [ ] Type checking
+- [ ] AST resolution
+3. Back-end
+- [ ] LLVM IR code generation
 
 ## Special Thanks
 These videos inspired me to tackle this project, even if some of them falls under different categories from compiler design:
@@ -95,4 +132,5 @@ These videos inspired me to tackle this project, even if some of them falls unde
 
 ## Additional Documentation
 1. [Amolang Cross Compiler](./docs/amocc.md)
-2. [The Amolang Programming Language](./docs/language.md)
+2. [Amolang-to-C++ translator](./docs/amo2cpp.md)
+3. [The Amolang Programming Language](./docs/language.md)

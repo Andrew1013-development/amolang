@@ -1,7 +1,0 @@
-void foo() {
-    printf("hello from other.amo");
-}
-
-void bar() {
-    printf("hello from other.amo, again");
-}

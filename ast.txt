@@ -36,5 +36,7 @@ FuncExpr
     [Expr]
 IntLiteral
     LIT_NUMBER
+FloatLiteral
+    FLOAT_LITERAL
 StringLiteral
     LIT_STRING

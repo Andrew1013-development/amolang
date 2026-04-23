@@ -3,10 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "stringbuilder.h"
-#include "memory.h"
+#include "../include/stringbuilder.h"
+#include "../include/memory.h"
 
-#define SIZE_BUFFER 1024
 // ===== PUBLIC API =====
 void init_sb(StringBuilder *sb) {
     // allocate memory

@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "ast.h"
-#include "stringbuilder.h"
+#include "../include/ast.h"
+#include "../include/stringbuilder.h"
 
 static const char* data_type(TokenType type) {
     switch (type) {
@@ -30,7 +30,6 @@ FuncArg *func_arg(TokenType type, char *name) {
 
     arg->type = type;
     arg->name = name;
-
     return arg;
 }
 char *func_args_to_string(FuncArg *args, size_t count) {
@@ -64,7 +63,6 @@ Expr *unary_expr(TokenType op, Expr *right) {
     expr->type = EXPR_UNARY;
     expr->unary.op = op;
     expr->unary.right = right;
-
     return expr;
 }
 Expr *identifier(char *name) {
@@ -72,7 +70,6 @@ Expr *identifier(char *name) {
 
     expr->type = EXPR_IDENTIFIER;
     expr->identifier.name = name;
-
     return expr;
 }
 Expr *func_call(char *name, Expr **args, size_t count, size_t capacity) {
@@ -83,7 +80,6 @@ Expr *func_call(char *name, Expr **args, size_t count, size_t capacity) {
     expr->func_call.args = args;
     expr->func_call.count = count;
     expr->func_call.capacity = capacity;
-
     return expr;
 }
 Expr *int_literal(int value) {
@@ -91,7 +87,6 @@ Expr *int_literal(int value) {
 
     expr->type = EXPR_LIT_INTEGER;
     expr->int_literal.value = value;
-
     return expr;
 }
 Expr *string_literal(char *value) {
@@ -99,12 +94,15 @@ Expr *string_literal(char *value) {
 
     expr->type = EXPR_LIT_STRING;
     expr->str_literal.value = value;
-
     return expr;
 }
 char *expr_to_string(Expr *expr) {
     char *str = calloc_s(1024, sizeof(char));
 
+    if (expr == NULL) {
+        sprintf(str, "NULL");
+        return str;
+    }
     switch (expr->type) {
         case EXPR_LIT_INTEGER:
             sprintf(str, "IntLiteral(%d)", expr->int_literal.value);
@@ -148,7 +146,6 @@ Stmt *var_decl(TokenType type, char *name, Expr *value) {
     stmt->var_decl.type = type;
     stmt->var_decl.name = name;
     stmt->var_decl.value = value;
-
     return stmt;
 }
 Stmt *var_assign(char *name, Expr *value) {
@@ -157,7 +154,6 @@ Stmt *var_assign(char *name, Expr *value) {
     stmt->type = STMT_VAR_ASSIGN;
     stmt->var_assign.name = name;
     stmt->var_assign.value = value;
-
     return stmt;
 }
 Stmt *block(Stmt **statements, size_t count, size_t capacity) {
@@ -167,7 +163,6 @@ Stmt *block(Stmt **statements, size_t count, size_t capacity) {
     stmt->block.statements = statements;
     stmt->block.count = count;
     stmt->block.capacity = capacity;
-
     return stmt;
 }
 Stmt *func_decl(TokenType type, char *name, FuncArg *args, size_t count, size_t capacity, Stmt *body) {
@@ -180,7 +175,6 @@ Stmt *func_decl(TokenType type, char *name, FuncArg *args, size_t count, size_t 
     stmt->func_decl.count = count;
     stmt->func_decl.capacity = capacity;
     stmt->func_decl.body = body;
-
     return stmt;
 }
 Stmt *return_stmt(Expr *value) {
@@ -188,7 +182,6 @@ Stmt *return_stmt(Expr *value) {
 
     stmt->type = STMT_RETURN;
     stmt->return_stmt.value = value;
-
     return stmt;
 }
 Stmt *expr_stmt(Expr *value) {
@@ -196,7 +189,6 @@ Stmt *expr_stmt(Expr *value) {
 
     stmt->type = STMT_EXPR;
     stmt->expr.value = value;
-
     return stmt;
 }
 void print_statement(Stmt *stmt) {
@@ -208,6 +200,12 @@ void print_statement(Stmt *stmt) {
             printf("VarAssign(%s, %s)\n", stmt->var_assign.name, expr_to_string(stmt->var_assign.value));
             break;
         case STMT_BLOCK:
+            printf("===== BlockStmt DETAILS =====\n");
+            printf("count = %zu, capacity = %zu\n", stmt->block.count, stmt->block.capacity);
+            printf("===== START OF BlockStmt =====\n");
+            for (size_t i = 0; i < stmt->block.count; i++)
+                print_statement(stmt->block.statements[i]);
+            printf("===== END OF BlockStmt =====\n");
             break;
         case STMT_FUNC_DECL:
             printf(
@@ -218,6 +216,7 @@ void print_statement(Stmt *stmt) {
                    stmt->func_decl.count,
                    stmt->func_decl.capacity
             );
+            print_statement(stmt->func_decl.body);
             break;
         case STMT_RETURN:
             printf("Return(%s)\n", expr_to_string(stmt->return_stmt.value));
@@ -241,6 +240,11 @@ void print_program(Program *prog) {
     for (size_t i = 0; i < prog->count; i++)
         print_statement(prog->statements[i]);
     printf("===== END OF PROGRAM CONTENT =====\n");
+}
+void free_program(Program *prog) {
+    free_s(prog->statements);
+    prog->statements = NULL;
+    prog->capacity = prog->count = 0;
 }
 
 // in accordance with C/C++ operator precedence

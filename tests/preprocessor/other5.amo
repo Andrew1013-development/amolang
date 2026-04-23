@@ -1,0 +1,3 @@
+string example2() {
+    return "this string is from dog2";
+}

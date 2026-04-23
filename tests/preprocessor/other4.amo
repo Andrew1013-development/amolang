@@ -1,0 +1,5 @@
+#include "other5.amo"
+
+string example1() {
+    return "this string on the other hand does not come from dog2";
+}

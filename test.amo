@@ -1,8 +1,7 @@
-// comment
-
-//#include "other.amo"
-//#include "other2.amo"
+#include "include.amo"
 #define TEST 15
+
+// this is only a test file
 
 int main() {
     int a = 16;

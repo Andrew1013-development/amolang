@@ -1,0 +1,33 @@
+int func1(int a) {
+
+    return a;
+
+}
+
+int func2(int b, int c) {
+
+    return b * c - 2;
+
+}
+
+int func3(int d, int e, int f) {
+
+    return d * e / f + 1;
+
+}
+
+
+
+int main() {
+
+    //int a = func1(1);
+
+    //int b = func2(2,3);
+
+    //int c = func3(4,5,6);
+
+    //int d = a + b + c;
+
+    return 0;
+
+}

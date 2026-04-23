@@ -1,0 +1,7 @@
+#define dog2 25
+#define SIZE 300
+int main() {
+    int a = SIZE;
+    int b = dog2 * SIZE;
+    return 0;
+}

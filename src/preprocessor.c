@@ -4,19 +4,21 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "stringbuilder.h"
-#include "utils.h"
+#include "../include/stringbuilder.h"
+#include "../include/utils.h"
 
 #define MAX_MACROS 100
 
 char* _read(const char* fname) {
     FILE *fptr;
     long fsize;
-    char* buf;
+    char *buf, *msg;
 
     fptr = fopen(fname, "rb"); // read in binary mode -> ensure file size correctness
-    if (fptr == NULL)
-        exit_with_error("unable to read file", 2);
+    if (fptr == NULL) {
+        sprintf(msg, "unable to read file %s", fname);
+        exit_with_error(msg, 2);
+    }        
 
     fsize = get_filesize(fptr);
     buf = calloc(fsize + 1, sizeof(char));
@@ -24,7 +26,6 @@ char* _read(const char* fname) {
         exit_with_error("something went wrong while reading file", 3);
 
     fclose(fptr);
-
     return buf;
 }
 
@@ -47,27 +48,29 @@ void _add_macro(const char *name, const char *value) {
 char* preprocess(const char* fname, bool debug) {
     FILE* fptr;
     StringBuilder sb;
-    char line[1024], buf[1024], *ptr, *inc;
+    char line[SIZE_BUFFER], buf[SIZE_BUFFER], *ptr, *inc, *msg;
     size_t buflen = 0;
     bool macro_match;
 
     fptr = fopen(fname, "rb"); // read in binary mode -> ensure file size correctness
-    if (fptr == NULL)
-        exit_with_error("unable to read file", 2);
+    if (fptr == NULL) {
+        sprintf(msg, "unable to read file %s", fname);
+        exit_with_error(msg, 2);
+    }
 
     init_sb(&sb);
 
-    // read in lines or 1kb chunks
-    while (fgets(line, 1024, fptr)) {
+    // read in lines or 2KiB chunks
+    while (fgets(line, SIZE_BUFFER, fptr)) {
         ptr = line; // set pointer to start of line
 
         // handle #include macros
         if (strncmp(line, "#include", 8) == 0) {
-            char inc_file[256];
+            char inc_file[_MAX_PATH];
 
             // read inclusion file -> remove macro and append to buffer
-            if (sscanf(line, "#include \"%255[^\"]\"", inc_file) == 1) {
-                inc = _read(inc_file);
+            if (sscanf(line, "#include \"%259[^\"]\"", inc_file) == 1) {
+                inc = preprocess(resolve_include_path(fname, inc_file), false);
                 concat_sb(&sb, inc);
                 free(inc);
             }
