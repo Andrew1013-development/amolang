@@ -1,5 +1,5 @@
 Program
-    BlockStmt
+    [Stmt]
 
 // Statement
 VarDeclStmt
@@ -20,6 +20,10 @@ ReturnStmt
     Expr
 ExprStmt
     Expr
+IfStmt
+    Expr
+    BlockStmt
+    BlockStmt
 
 // Expression (Expr)
 BinaryExpr

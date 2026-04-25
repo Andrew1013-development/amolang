@@ -21,6 +21,21 @@ static const char* operation_type(TokenType type) {
         case OP_MULTIPLY: return "*";
         case OP_DIVIDE: return "/";
         case OP_MODULO: return "%";
+        case OP_LOGICAL_AND: return "&&";
+        case OP_LOGICAL_OR: return "||";
+        case OP_LOGICAL_NOT: return "!";
+        case OP_BITWISE_AND: return "&";
+        case OP_BITWISE_OR: return "|";
+        case OP_BITWISE_XOR: return "^";
+        case OP_BITWISE_NOT: return "~";
+        case OP_BITWISE_LEFT_SHIFT: return "<<";
+        case OP_BITWISE_RIGHT_SHIFT: return ">>";
+        case COMP_LESS: return "<";
+        case COMP_GREATER: return ">";
+        case COMP_LESS_EQUAL: return "<=";
+        case COMP_GREATER_EQUAL: return ">=";
+        case COMP_EQUAL: return "==";
+        case COMP_NOT_EQUAL: return "!=";
         default: return "unknown operation";
     }
 }
@@ -96,11 +111,18 @@ Expr *func_call(char *name, Expr **params, size_t count, size_t capacity) {
     expr->func_call.capacity = capacity;
     return expr;
 }
-Expr *int_literal(int value) {
+Expr *int_literal(long long value) {
     Expr *expr = malloc_s(sizeof(Expr));
 
     expr->type = EXPR_LIT_INTEGER;
     expr->int_literal.value = value;
+    return expr;
+}
+Expr *float_literal(double value) {
+    Expr *expr = malloc_s(sizeof(Expr));
+    
+    expr->type = EXPR_LIT_FLOAT;
+    expr->float_literal.value = value;
     return expr;
 }
 Expr *string_literal(char *value) {
@@ -119,7 +141,10 @@ char *expr_to_string(Expr *expr) {
     }
     switch (expr->type) {
         case EXPR_LIT_INTEGER:
-            sprintf(str, "IntLiteral(%d)", expr->int_literal.value);
+            sprintf(str, "IntLiteral(%lld)", expr->int_literal.value);
+            break;
+        case EXPR_LIT_FLOAT:
+            sprintf(str, "FloatLiteral(%f)", expr->float_literal.value);
             break;
         case EXPR_LIT_STRING:
             sprintf(str, "StrLiteral(%s)", expr->str_literal.value);
@@ -208,7 +233,21 @@ Stmt *expr_stmt(Expr *value) {
     stmt->expr.value = value;
     return stmt;
 }
+Stmt *if_stmt(Expr *condition, Stmt *then_branch, Stmt *else_branch) {
+    Stmt *stmt = malloc_s(sizeof(Stmt));
+
+    stmt->type = STMT_IF;
+    stmt->if_stmt.condition = condition;
+    stmt->if_stmt.then_branch = then_branch;
+    stmt->if_stmt.else_branch = else_branch;
+    return stmt;
+}
 void print_statement(Stmt *stmt) {
+    if (stmt == NULL) {
+        printf("NULL\n");
+        return;
+    }
+    
     switch (stmt->type) {
         case STMT_VAR_DECL:
             printf("VarDecl(%s, %s, %s)\n", data_type(stmt->var_decl.type), stmt->var_decl.name, expr_to_string(stmt->var_decl.value));
@@ -241,6 +280,15 @@ void print_statement(Stmt *stmt) {
         case STMT_EXPR:
             printf("Expr(%s)\n", expr_to_string(stmt->expr.value));
             break;
+        case STMT_IF:
+            printf("If(%s)\n", expr_to_string(stmt->if_stmt.condition));
+            printf("===== START OF then_branch =====\n");
+            print_statement(stmt->if_stmt.then_branch);
+            printf("===== END OF then_branch =====\n");
+            printf("===== START OF else_branch =====\n");
+            print_statement(stmt->if_stmt.else_branch);
+            printf("===== END OF else_branch =====\n");
+            break;
     }
 }
 
@@ -269,28 +317,49 @@ double op_precedence(TokenType op_type, bool rightside) {
     double val = 0.0;
 
     switch (op_type) {
-        case OP_NOT:
-            val = 6.0;
+        case OP_LOGICAL_NOT:
+        case OP_BITWISE_NOT:
+            val = 11.0;
             break;
         // multiplicative operators
         case OP_MULTIPLY:
         case OP_DIVIDE:
         case OP_MODULO:
-            val = 5.0;
+            val = 10.0;
             break;
         // additive operators
         case OP_ADD:
         case OP_SUBTRACT:
-            val = 4.0;
+            val = 9.0;
+            break;
+        case OP_BITWISE_LEFT_SHIFT:
+        case OP_BITWISE_RIGHT_SHIFT:
+            val = 8.0;
+            break;
+        case COMP_LESS:
+        case COMP_GREATER:
+        case COMP_LESS_EQUAL:
+        case COMP_GREATER_EQUAL:
+            val = 7.0;
+            break;
+        case COMP_EQUAL:
+        case COMP_NOT_EQUAL:
+            val = 6.0;
             break;
         // bitwise operations
-        case OP_AND:
+        case OP_BITWISE_AND:
+            val = 5.0;
+            break;
+        case OP_BITWISE_XOR:
+            val = 4.0;
+            break;
+        case OP_BITWISE_OR:
             val = 3.0;
             break;
-        case OP_XOR:
+        case OP_LOGICAL_AND:
             val = 2.0;
             break;
-        case OP_OR:
+        case OP_LOGICAL_OR:
             val = 1.0;
             break;
         default:

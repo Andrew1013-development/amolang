@@ -35,7 +35,7 @@ $(OBJ_DIR)/%.test: $(TEST_DIR)/%.amo
 	@echo "Running test: $*"
 	@mkdir -p $(dir $@)
 	./$(TARGET) --debug-$(firstword $(subst /, ,$*)) $< > $@
-	#@fc.exe $(subst /,\,$@) $(subst /,\,$(TEST_DIR)/$*.ans)
+	@powershell diff $(subst /,\,$@) $(subst /,\,$(TEST_DIR)/$*.ans)
 	@echo
 test-cli:
 	@echo "===== ARGUMENT TESTS ====="

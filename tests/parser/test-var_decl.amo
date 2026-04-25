@@ -1,6 +1,7 @@
 int a;
-int b = 16;
+int b = 16.7;
 int c = 1 + 3;
 int d = a;
-int e = 1 + 2 * 3;
-int f = b * 2 + c - d;
+int e = 1 + 2.1 * c;
+int f = -d;
+int g = (1 + -2) * 6.1 / b;

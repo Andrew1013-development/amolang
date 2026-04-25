@@ -1,0 +1,13 @@
+int main() {
+    if (a == b) {
+        printf("a is equal to b");
+        printf("dog1");
+    } else {
+        printf("a is not equal to b");
+        printf("dog2");
+    }
+    if (a > b) {
+        printf("this might mean you're gay");
+    }
+    return 0;
+}

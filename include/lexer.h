@@ -6,12 +6,19 @@ typedef enum {
     PUNC_LBRACE, PUNC_RBRACE, // {}
     PUNC_LBRACKET, PUNC_RBRACKET, // []
     PUNC_LPAREN, PUNC_RPAREN, // ()
-    PUNC_SEMICOLON, PUNC_COLON, PUNC_COMMA, // ;:,
+    PUNC_SEMICOLON, PUNC_COLON, PUNC_COMMA, PUNC_DOT, // ;:,.
 
     // operator
     OP_ADD, OP_SUBTRACT, OP_MULTIPLY, OP_DIVIDE, OP_MODULO, // math
-    OP_AND, OP_OR, OP_XOR, OP_NOT, // bitwise
+    OP_LOGICAL_AND, OP_LOGICAL_OR, OP_LOGICAL_NOT, // logical
+    OP_BITWISE_AND, OP_BITWISE_OR, OP_BITWISE_XOR, OP_BITWISE_NOT, // bitwise operations
+    OP_BITWISE_LEFT_SHIFT, OP_BITWISE_RIGHT_SHIFT, // << >>
     OP_ASSIGN, // =
+
+    // comparator
+    COMP_LESS, COMP_GREATER, // < >
+    COMP_LESS_EQUAL, COMP_GREATER_EQUAL, // <= >=
+    COMP_EQUAL, COMP_NOT_EQUAL, // == !=
 
     // keyword
     KW_INT, KW_FLOAT, KW_STRING, KW_VOID, // data types

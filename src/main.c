@@ -25,10 +25,10 @@ int main(int argc, char** argv) {
         printf("@ Stability is not guaranteed! Proceed with caution! @\n");
         printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
         print_config(&config);
-    #else
-        if (config.verbose)
-            print_config(&config);
     #endif
+
+    if (config.verbose)
+        print_config(&config);
 
     // preprocessing
     buf = preprocess(config.input_file, config.debug_preprocessor);
@@ -39,6 +39,8 @@ int main(int argc, char** argv) {
     program = parse(&parser);
     if (config.debug_parser)
         print_program(program);
+
+    // semantic analysis
 
     // codegen
     

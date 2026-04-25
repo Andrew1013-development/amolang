@@ -18,17 +18,30 @@ const char* tokentype_to_string(TokenType type) {
         case PUNC_SEMICOLON: return "PUNC_SEMICOLON";
         case PUNC_COLON: return "PUNC_COLON";
         case PUNC_COMMA: return "PUNC_COMMA";
+        case PUNC_DOT: return "PUNC_DOT";
         // operators
         case OP_ADD: return "OP_ADD";
         case OP_SUBTRACT: return "OP_SUBTRACT";
         case OP_MULTIPLY: return "OP_MULTIPLY";
         case OP_DIVIDE: return "OP_DIVIDE";
         case OP_MODULO: return "OP_MODULO";
-        case OP_AND: return "OP_AND";
-        case OP_OR: return "OP_OR";
-        case OP_XOR: return "OP_XOR";
-        case OP_NOT: return "OP_NOT";
+        case OP_LOGICAL_AND: return "OP_LOGICAL_AND";
+        case OP_LOGICAL_OR: return "OP_LOGICAL_OR";
+        case OP_LOGICAL_NOT: return "OP_LOGICAL_NOT";
+        case OP_BITWISE_AND: return "OP_BITWISE_AND";
+        case OP_BITWISE_OR: return "OP_BITWISE_OR";
+        case OP_BITWISE_XOR: return "OP_BITWISE_XOR";
+        case OP_BITWISE_NOT: return "OP_BITWISE_NOT";
+        case OP_BITWISE_LEFT_SHIFT: return "OP_BITWISE_LEFT_SHIFT";
+        case OP_BITWISE_RIGHT_SHIFT: return "OP_BITWISE_RIGHT_SHIFT";
         case OP_ASSIGN: return "OP_ASSIGN";
+        // comparators
+        case COMP_LESS: return "COMP_LESS";
+        case COMP_GREATER: return "COMP_GREATER";
+        case COMP_LESS_EQUAL: return "COMP_LESS_EQUAL";
+        case COMP_GREATER_EQUAL: return "COMP_GREATER_EQUAL";
+        case COMP_EQUAL: return "COMP_EQUAL";
+        case COMP_NOT_EQUAL: return "COMP_NOT_EQUAL";
         // keywords
         case KW_INT: return "KW_INT";
         case KW_FLOAT: return "KW_FLOAT";
@@ -131,8 +144,8 @@ static TokenType _word_type(Lexer* lexer) {
             if (strncmp(lexer->start, "return", 6) == 0) return KW_RETURN;
             if (strncmp(lexer->start, "string", 6) == 0) return KW_STRING;
             break;
-        case 7:
-            if (strncmp(lexer->start, "continue", 7) == 0) return KW_CONTINUE;
+        case 8:
+            if (strncmp(lexer->start, "continue", 8) == 0) return KW_CONTINUE;
             break;
     }
     return TOK_IDENTIFIER;
@@ -154,9 +167,16 @@ static Token _identifier(Lexer* lexer) {
     return _make_token(lexer, _word_type(lexer));
 }
 static Token _number(Lexer* lexer) {
+    // parse integer part of number
     while (isdigit(_peek(lexer, 0)))
         _consume(lexer);
-
+    // parse floating point part of number
+    if (_peek(lexer, 0) == '.') { 
+        _consume(lexer);
+        while (isdigit(_peek(lexer, 0)))
+            _consume(lexer);
+        return _make_token(lexer, LIT_FLOAT);
+    }
     return _make_token(lexer, LIT_INTEGER);
 }
 static Token _string(Lexer* lexer) {
@@ -188,18 +208,63 @@ Token next_token(Lexer* lexer) {
         case '}': return _make_token(lexer, PUNC_RBRACE);
         case ';': return _make_token(lexer, PUNC_SEMICOLON);
         case ':': return _make_token(lexer, PUNC_COLON);
-        case ',': return _make_token(lexer ,PUNC_COMMA);
+        case ',': return _make_token(lexer, PUNC_COMMA);
+        case '.': return _make_token(lexer, PUNC_DOT);
         // operator
         case '+': return _make_token(lexer, OP_ADD);
         case '-': return _make_token(lexer, OP_SUBTRACT);
         case '*': return _make_token(lexer, OP_MULTIPLY);
         case '/': return _make_token(lexer, OP_DIVIDE);
         case '%': return _make_token(lexer, OP_MODULO);
-        case '=': return _make_token(lexer, OP_ASSIGN);
-        case '&': return _make_token(lexer, OP_AND);
-        case '|': return _make_token(lexer, OP_OR);
-        case '^': return _make_token(lexer, OP_XOR);
-        case '!': return _make_token(lexer, OP_NOT);
+        case '=':
+            if (_peek(lexer, 0) == '=') {
+                _consume(lexer);
+                return _make_token(lexer, COMP_EQUAL);
+            }
+            return _make_token(lexer, OP_ASSIGN);
+        case '&': 
+            if (_peek(lexer, 0) == '&') {
+                _consume(lexer);
+                return _make_token(lexer, OP_LOGICAL_AND);
+            }
+            return _make_token(lexer, OP_BITWISE_AND);
+        case '|':
+            if (_peek(lexer, 0) == '|') {
+                _consume(lexer);
+                return _make_token(lexer, OP_LOGICAL_OR);
+            }
+            return _make_token(lexer, OP_BITWISE_OR);
+        case '^': return _make_token(lexer, OP_BITWISE_XOR);
+        case '~': return _make_token(lexer, OP_BITWISE_NOT);
+        case '!':
+            if (_peek(lexer, 0) == '=') {
+                _consume(lexer);
+                return _make_token(lexer, COMP_NOT_EQUAL);
+            }
+            return _make_token(lexer, OP_LOGICAL_NOT);
+        // comparator
+        case '<':
+            switch (_peek(lexer, 0)) {
+                case '=':
+                    _consume(lexer);
+                    return _make_token(lexer, COMP_LESS_EQUAL);
+                case '<':
+                    _consume(lexer);
+                    return _make_token(lexer, OP_BITWISE_LEFT_SHIFT);
+                default:
+                    return _make_token(lexer, COMP_LESS);
+            }
+        case '>': 
+            switch (_peek(lexer, 0)) {
+                case '=':
+                    _consume(lexer);
+                    return _make_token(lexer, COMP_GREATER_EQUAL);
+                case '>':
+                    _consume(lexer);
+                    return _make_token(lexer, OP_BITWISE_RIGHT_SHIFT);
+                default:
+                    return _make_token(lexer, COMP_GREATER);
+            }
         // ???
         case '"': return _string(lexer);
     }

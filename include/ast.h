@@ -22,6 +22,7 @@ char *func_params_to_string(Expr **params, size_t count);
 // expressions
 typedef enum {
     EXPR_LIT_INTEGER,
+    EXPR_LIT_FLOAT,
     EXPR_LIT_STRING,
     EXPR_IDENTIFIER,
     EXPR_BINARY,
@@ -48,8 +49,11 @@ typedef struct {
     size_t capacity;
 } FuncCallExpr;
 typedef struct {
-    int value;
+    long long value;
 } IntLiteral;
+typedef struct {
+    double value;
+} FloatLiteral;
 typedef struct {
     char* value;
 } StringLiteral;
@@ -62,6 +66,7 @@ struct Expr {
         IdentifierExpr identifier;
         FuncCallExpr func_call;
         IntLiteral int_literal;
+        FloatLiteral float_literal;
         StringLiteral str_literal;
     };
 };
@@ -69,7 +74,8 @@ Expr *binary_expr(Expr *left, TokenType op, Expr *right);
 Expr *unary_expr(TokenType op, Expr *right);
 Expr *identifier(char *name);
 Expr *func_call(char *name, Expr **params, size_t count, size_t capacity);
-Expr *int_literal(int value);
+Expr *int_literal(long long value);
+Expr *float_literal(double value);
 Expr *string_literal(char *name);
 char *expr_to_string(Expr* expr);
 
@@ -80,7 +86,8 @@ typedef enum {
     STMT_BLOCK,
     STMT_FUNC_DECL,
     STMT_RETURN,
-    STMT_EXPR
+    STMT_EXPR,
+    STMT_IF,
 } StmtType;
 
 typedef struct {
@@ -111,6 +118,11 @@ typedef struct {
 typedef struct {
     Expr *value;
 } ExprStmt;
+typedef struct {
+    Expr *condition;
+    Stmt *then_branch;
+    Stmt *else_branch;
+} IfStmt;
 struct Stmt {
     StmtType type;
     union {
@@ -120,6 +132,7 @@ struct Stmt {
         FuncDeclStmt func_decl;
         ReturnStmt return_stmt;
         ExprStmt expr;
+        IfStmt if_stmt;
     };
 };
 Stmt *var_decl(TokenType type, char *name, Expr *value);
@@ -128,6 +141,7 @@ Stmt *block(Stmt **statements, size_t count, size_t capacity);
 Stmt *func_decl(TokenType type, char *name, FuncArg *args, size_t count, size_t capacity, Stmt *body);
 Stmt *return_stmt(Expr *value);
 Stmt *expr_stmt(Expr *value);
+Stmt *if_stmt(Expr *condition, Stmt *then_branch, Stmt *else_branch);
 void print_statement(Stmt *stmt);
 
 // program

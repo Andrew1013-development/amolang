@@ -78,19 +78,19 @@ No guidelines on how to contribute at this point in time, will update later.
 
 ## Roadmap (subject to change)
 ### Language features 
-- [ ] Initial
-    - [ ] Primitive data types (int, float)
-    - [ ] Mathematical operators
-    - [ ] Bitwise operators
-    - [ ] Expression parsing
+- [x] Foundation
+    - [x] Primitive data types (int, float)
+    - [x] Mathematical operators
+    - [x] Bitwise operators
+    - [x] Expression parsing 
 - [ ] State and Memory
-    - [ ] Variable declarations
-    - [ ] Variable assignments
+    - [x] Variable declarations
+    - [x] Variable assignments
     - [ ] Scoping
 - [ ] Logic and Branching
-    - [ ] Comparison operators
-    - [ ] Logical operators
-    - [ ] If / else statements
+    - [x] Comparison operators
+    - [x] Logical operators
+    - [ ] If / else statements (implementing)
 - [ ] Iteration
     - [ ] For / while loops
     - [ ] Control transfer (break / continue)
@@ -106,13 +106,14 @@ No guidelines on how to contribute at this point in time, will update later.
     - [ ] File I/O functions (`open()`, `fprintf()`, `fscanf()`, etc.)
     - [ ] Filesystem operations (`move()`, `copy()`, etc.)
     - [ ] System functions (`rand()`, `time()`, etc.)
+    - [ ] Math functions (`log()`, `exp()`, `pow()`, etc.)
 - [ ] Extension 2
     - [ ] Error handling
     - [ ] Memory management
 
 ### Amolang Cross Compiler
 1. Front-end
-- [ ] Preprocessing
+- [x] Preprocessing
 - [ ] Lexical analysis
 - [ ] Parsing
 2. Middle-end
@@ -121,11 +122,14 @@ No guidelines on how to contribute at this point in time, will update later.
 - [ ] AST resolution
 3. Back-end
 - [ ] LLVM IR code generation
+- [ ] Direct compilation
+- [ ] Cross-translation into C++
 
 ## Special Thanks
 These videos inspired me to tackle this project, even if some of them falls under different categories from compiler design:
 - [How do computers read code? - Frame of Essence (YouTube)](https://www.youtube.com/watch?v=QXjU9qTsYCc)
 - [phi - wzid (GitHub)](https://github.com/wzid/phi)
+- [hydrogen-cpp - orosmatthew (GitHub)](https://github.com/orosmatthew/hydrogen-cpp)
 - [I made an entire OS that only runs Tetris - jdh (YouTube)](https://www.youtube.com/watch?v=FaILnmUYS_U)
 - [I designed my own 8-bit computer just to play PONG - jdh (YouTube)](https://www.youtube.com/watch?v=7A1SzIIKMho)
 - [I made a C compiler in C - lolzdev (YouTube)](https://www.youtube.com/watch?v=UW8LgC-S_co)

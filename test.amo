@@ -4,12 +4,27 @@
 // this is only a test file
 
 int main() {
+    // math parsing check
     int a;
-    int b = 16;
+    int b = 16.3;
     int c = TEST - 1;
     int d = b + c;
     a = foo(9, 11);
     b = foo(c, d) + a - 10;
+    c = -3 + -a;
+    d = (1 + -2) * 6.1 / b;
+    // function call check
     printf("this is a test");
+    // conditional check
+    if (a == b) {
+        printf("a is equal to b");
+        printf("dog1");
+    } else {
+        printf("a is not equal to b");
+        printf("dog2");
+    }
+    if (a > b) {
+        printf("this might mean you're gay");
+    } 
     return 0;
 }
