@@ -15,6 +15,8 @@ typedef enum {
 
     // keyword
     KW_INT, KW_FLOAT, KW_STRING, KW_VOID, // data types
+    KW_IF, KW_ELSE, // conditional
+    KW_FOR, KW_WHILE, KW_BREAK, KW_CONTINUE, // iterations
     KW_RETURN,
 
     // literals

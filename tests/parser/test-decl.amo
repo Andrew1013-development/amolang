@@ -1,0 +1,11 @@
+int SIZE = 50;
+int square(int n) { return n * n * n; }
+string dog2(string su, string si, string trum) {
+    return su + si + trum;
+}
+int main() {
+    int a = SIZE * 2;
+    printf(dog2("dog1", "dog2", "dog3"));
+    printf(square(a));
+    return 0;
+}

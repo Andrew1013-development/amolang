@@ -4,15 +4,14 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "../include/preprocessor.h"
 #include "../include/stringbuilder.h"
 #include "../include/utils.h"
-
-#define MAX_MACROS 100
 
 char* _read(const char* fname) {
     FILE *fptr;
     long fsize;
-    char *buf, *msg;
+    char *buf, msg[256];
 
     fptr = fopen(fname, "rb"); // read in binary mode -> ensure file size correctness
     if (fptr == NULL) {
@@ -29,10 +28,6 @@ char* _read(const char* fname) {
     return buf;
 }
 
-typedef struct {
-    char name[64];
-    char value[256];
-} Macro;
 Macro macros[MAX_MACROS];
 int macros_cnt = 0;
 void _add_macro(const char *name, const char *value) {
@@ -48,7 +43,7 @@ void _add_macro(const char *name, const char *value) {
 char* preprocess(const char* fname, bool debug) {
     FILE* fptr;
     StringBuilder sb;
-    char line[SIZE_BUFFER], buf[SIZE_BUFFER], *ptr, *inc, *msg;
+    char line[SIZE_BUFFER], buf[SIZE_BUFFER], *ptr, *inc, msg[256];
     size_t buflen = 0;
     bool macro_match;
 
@@ -78,10 +73,10 @@ char* preprocess(const char* fname, bool debug) {
         }
         // handle #define macros
         if (strncmp(line, "#define", 7) == 0) {
-            char name[64], value[256];
+            char name[SIZE_MACRO_NAME], value[SIZE_MACRO_VALUE];
 
             // record macro into symbol table for search-and-replace
-            if (sscanf(line, "#define %63s %255[^\r\n]", name, value) == 2)
+            if (sscanf(line, "#define %255s %1023[^\r\n]", name, value) == 2)
                 _add_macro(name, value);
             continue;
         }

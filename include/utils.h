@@ -7,6 +7,6 @@
 void exit_with_error(char* message, int code);
 long get_filesize(FILE* fptr);
 char *canonical_path(char *path);
-char *resolve_include_path(char *base_path, char *include_path);
+char *resolve_include_path(const char *base_path, char *include_path);
 
 #endif // UTILS_H

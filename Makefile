@@ -12,7 +12,7 @@ TARGET := $(BIN_DIR)/amocc.exe
 SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
 TEST_FILES := $(wildcard $(TEST_DIR)/*/test-*.amo)
-TEST_ANSWERS := $(wildcard $(TEST_DIR)/*/*.ans)
+TEST_ANSWERS := $(wildcard $(TEST_DIR)/*/test-*.ans)
 TEST_RESULTS := $(patsubst $(TEST_DIR)/%.amo, $(OBJ_DIR)/%.test, $(TEST_FILES))
 
 all: $(TARGET)
@@ -31,17 +31,18 @@ run: $(TARGET)
 # for now fc.exe is usable since development is still on Windows
 test: clean all $(TEST_RESULTS) test-cli
 	@echo "===== ALL TESTS COMPLETED ====="
-build/%.test: tests/%.amo
+$(OBJ_DIR)/%.test: $(TEST_DIR)/%.amo
 	@echo "Running test: $*"
 	@mkdir -p $(dir $@)
-	-./$(TARGET) --debug-$(firstword $(subst /, ,$*)) $< > $@
+	./$(TARGET) --debug-$(firstword $(subst /, ,$*)) $< > $@
 	#@fc.exe $(subst /,\,$@) $(subst /,\,$(TEST_DIR)/$*.ans)
+	@echo
 test-cli:
 	@echo "===== ARGUMENT TESTS ====="
-	-./$(TARGET) --help
-	-./$(TARGET) --version
-	-./$(TARGET) --debug-preprocessor test.amo
-	-./$(TARGET) --debug-preprocessor --debug-lexer --debug-parser test.amo
+	./$(TARGET) --help
+	./$(TARGET) --version
+	./$(TARGET) --debug-preprocessor test.amo
+	./$(TARGET) --debug-preprocessor --debug-lexer --debug-parser test.amo
 	-./$(TARGET) --debug-preprocessor --debug-lexer --debug-parser
 
 clean:

@@ -17,8 +17,8 @@ typedef struct {
     char *name;
 } FuncArg;
 FuncArg *func_arg(TokenType type, char *name);
-char *func_args_to_string(FuncArg *arg, size_t count);
-
+char *func_args_to_string(FuncArg *args, size_t count);
+char *func_params_to_string(Expr **params, size_t count);
 // expressions
 typedef enum {
     EXPR_LIT_INTEGER,
@@ -43,7 +43,7 @@ typedef struct {
 } IdentifierExpr;
 typedef struct {
     char *name;
-    Expr **args;
+    Expr **params;
     size_t count;
     size_t capacity;
 } FuncCallExpr;
@@ -68,7 +68,7 @@ struct Expr {
 Expr *binary_expr(Expr *left, TokenType op, Expr *right);
 Expr *unary_expr(TokenType op, Expr *right);
 Expr *identifier(char *name);
-Expr *func_call(char *name, Expr **args, size_t count, size_t capacity);
+Expr *func_call(char *name, Expr **params, size_t count, size_t capacity);
 Expr *int_literal(int value);
 Expr *string_literal(char *name);
 char *expr_to_string(Expr* expr);

@@ -34,6 +34,12 @@ const char* tokentype_to_string(TokenType type) {
         case KW_FLOAT: return "KW_FLOAT";
         case KW_STRING: return "KW_STRING";
         case KW_VOID: return "KW_VOID";
+        case KW_IF: return "KW_IF";
+        case KW_ELSE: return "KW_ELSE";
+        case KW_FOR: return "KW_FOR";
+        case KW_WHILE: return "KW_WHILE";
+        case KW_BREAK: return "KW_BREAK";
+        case KW_CONTINUE: return "KW_CONTINUE";
         case KW_RETURN: return "KW_RETURN";
         // literals
         case LIT_INTEGER: return "LIT_INTEGER";
@@ -105,17 +111,28 @@ static void _skip(Lexer* lexer) {
 // match token type to identifier or keywords
 static TokenType _word_type(Lexer* lexer) {
     switch ((int)(lexer->current - lexer->start)) {
+        case 2:
+            if (strncmp(lexer->start, "if", 2) == 0) return KW_IF;
+            break;
         case 3:
             if (strncmp(lexer->start, "int", 3) == 0) return KW_INT;
+            if (strncmp(lexer->start, "for", 3) == 0) return KW_FOR;
             break;
         case 4:
             if (strncmp(lexer->start, "void", 4) == 0) return KW_VOID;
+            if (strncmp(lexer->start, "else", 4) == 0) return KW_ELSE;
             break;
         case 5:
             if (strncmp(lexer->start, "float", 5) == 0) return KW_FLOAT;
+            if (strncmp(lexer->start, "while", 5) == 0) return KW_WHILE;
+            if (strncmp(lexer->start, "break", 5) == 0) return KW_BREAK;
+            break;
         case 6:
             if (strncmp(lexer->start, "return", 6) == 0) return KW_RETURN;
             if (strncmp(lexer->start, "string", 6) == 0) return KW_STRING;
+            break;
+        case 7:
+            if (strncmp(lexer->start, "continue", 7) == 0) return KW_CONTINUE;
             break;
     }
     return TOK_IDENTIFIER;

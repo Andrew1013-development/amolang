@@ -9,10 +9,11 @@
 #include "../include/utils.h"
 #include "../include/ast.h"
 
-// FORWARD DECLARATIONS
+// ===== FORWARD DECLARATIONS =====
 static Expr *_parse_expression(Parser *parser, double precedence);
-static Expr *_parse_prefix(Parser *parser, Token token);
+static Expr *_parse_prefix(Parser *parser);
 static Expr *_parse_infix(Parser *parser, Expr *left, TokenType op);
+static Expr *_parse_func_call(Parser *parser, char *name);
 static Stmt *_parse_declaration(Parser *parser, TokenType type);
 
 // ===== PUBLIC APIS =====
@@ -23,7 +24,7 @@ void init_parser(Parser *parser, Lexer *lexer, bool debug) {
 }
 
 // ===== INTERNAL FUNCTIONS =====
-// see lookahead token
+// return lookahead token
 static Token _peek(Parser *parser) {
     return parser->lookahead;
 }
@@ -51,29 +52,36 @@ static void _expect(Parser *parser, TokenType type) {
     }
     _consume(parser);
 }
-/// get ready: a lot of very messy parsing code will follow this comment.
-/// you have been warned.
-/// [please just end my misery already]
-// parse expression with right-side priority -> parse right side then merge to left side
+
+// ===== EXPRESSION PARSING =====
+// entry point to parse expressions 
+// parse with right-side priority -> parse right side (infix) then merge to left side (prefix)
 static Expr *_parse_expression(Parser *parser, double precedence) {
     Expr *left;
     TokenType op;
 
-    left = _parse_prefix(parser, _peek(parser));
-    _consume(parser);
+    left = _parse_prefix(parser);
+    //_consume(parser);
     while (precedence < op_precedence(_peek(parser).type, false)) {
         op = _peek(parser).type;
-        _consume(parser);
+        _consume(parser); // consume the operator
         left = _parse_infix(parser, left, op);
     }
     return left;
 }
 // parse prefix (any element before operation)
-static Expr *_parse_prefix(Parser *parser, Token token) {
+static Expr *_parse_prefix(Parser *parser) {
+    Token token;
+
+    token = _peek(parser);
+    _consume(parser);
     switch (token.type) {
         case LIT_INTEGER: return int_literal(atoi(token_to_string(token)));
         case LIT_STRING: return string_literal(token_to_string(token));
-        case TOK_IDENTIFIER: return identifier(token_to_string(token));
+        case TOK_IDENTIFIER:
+            if (_peek(parser).type == PUNC_LPAREN)
+                return _parse_func_call(parser, token_to_string(token));
+            return identifier(token_to_string(token));
         default:
             exit_with_error("expected expression", 11);
             return NULL;
@@ -95,8 +103,33 @@ static Expr *_parse_infix(Parser *parser, Expr *left, TokenType op) {
             return left;
     }
 }
+// function call: [identifier]([params],...)
+static Expr *_parse_func_call(Parser *parser, char *name) {
+    Expr **params;
+    size_t count, capacity;
+
+    count = 0;
+    capacity = 8;
+    params = calloc_s(capacity, sizeof(Expr));
+
+    _expect(parser, PUNC_LPAREN);
+    while (_peek(parser).type != PUNC_RPAREN && _peek(parser).type != TOK_EOF) {
+        if (count >= capacity) {
+            capacity *= 2;
+            params = realloc_s(params, capacity * sizeof(Expr));
+        }
+        params[count++] = _parse_expression(parser, 0.0);
+        if (!(_match(parser, PUNC_COMMA))) 
+            break;
+    }
+    _expect(parser, PUNC_RPAREN);
+    return func_call(name, params, count, capacity);
+}
+// ===== STATEMENT PARSING =====
+// entry point to parse statements
 static Stmt *_parse_statement(Parser *parser) {
     Expr *value;
+    char *identifier;
 
     switch (_peek(parser).type) {
         case KW_INT:
@@ -109,27 +142,28 @@ static Stmt *_parse_statement(Parser *parser) {
             _expect(parser, PUNC_SEMICOLON);
             return return_stmt(value);
         case TOK_IDENTIFIER:
+            identifier = token_to_string(_peek(parser));
             _consume(parser); // consume TOK_IDENTIFIER
             switch (_peek(parser).type) {
                 case OP_ASSIGN:
-                    // TODO: variable assignment
-                    break;
+                    _consume(parser); // consume OP_ASSIGN
+                    value = _parse_expression(parser, 0.0);
+                    _expect(parser, PUNC_SEMICOLON);
+                    return var_assign(identifier, value);
                 case PUNC_LPAREN:
-                    // TODO: function call
-                    break;
+                    value = _parse_func_call(parser, identifier);
+                    _expect(parser, PUNC_SEMICOLON);
+                    return expr_stmt(value);
                 default:
                     exit_with_error("expected assignment or function call", 10);
                     return NULL;
             }
-            while(_peek(parser).type != PUNC_SEMICOLON) _consume(parser);
-            _expect(parser, PUNC_SEMICOLON);
-            return expr_stmt(NULL);
         default:
             exit_with_error("expected statement", 15);
             return NULL;
     }
 }
-// function argument: [type] [identifier],...
+// function argument: ([type] [identifier],...)
 static FuncArg *_parse_func_args(Parser *parser, size_t *count, size_t *capacity) {
     FuncArg *args;
     TokenType type;
@@ -171,7 +205,7 @@ static FuncArg *_parse_func_args(Parser *parser, size_t *count, size_t *capacity
     _expect(parser, PUNC_RPAREN);
     return args;
 }
-// function declaration: [type] [identifier] ([function arg],...) { [statement], ... }
+// block statement: { [statement],... }
 static Stmt *_parse_block(Parser *parser) {
     size_t count = 0, capacity = 8;
     Stmt **statements = calloc_s(capacity, sizeof(Stmt*));
@@ -187,6 +221,7 @@ static Stmt *_parse_block(Parser *parser) {
     _expect(parser, PUNC_RBRACE);
     return block(statements, count, capacity);
 }
+// function declaration: [type] [identifier] ([function arg],...) { [block statement] }
 static Stmt *_parse_func_decl(Parser *parser, TokenType type, char *name) {
     FuncArg *args;
     size_t count, capacity;

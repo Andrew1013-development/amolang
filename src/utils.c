@@ -28,7 +28,7 @@ char *canonical_path(char *path) {
     #endif
 }
 
-char *resolve_include_path(char *base_path, char *include_path) {
+char *resolve_include_path(const char *base_path, char *include_path) {
     char *last_forward, *last_backward, *messy_path, *final_path;
     size_t delimiter_pos;
 

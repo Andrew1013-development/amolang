@@ -45,6 +45,20 @@ char *func_args_to_string(FuncArg *args, size_t count) {
     concat_sb(&sb, "]");
     return sb.buffer;
 }
+// function parameters (basically just a bunch of expressions)
+char *func_params_to_string(Expr **params, size_t count) {
+    char temp[1024];
+    StringBuilder sb;
+
+    init_sb(&sb);
+    concat_sb(&sb, "[");
+    for (size_t i = 0; i < count; i++) {
+        sprintf(temp, "%s, ", expr_to_string(params[i]));
+        concat_sb(&sb, temp);
+    }
+    concat_sb(&sb, "]");
+    return sb.buffer;
+}
 
 // expressions
 Expr *binary_expr(Expr *left, TokenType op, Expr *right) {
@@ -72,12 +86,12 @@ Expr *identifier(char *name) {
     expr->identifier.name = name;
     return expr;
 }
-Expr *func_call(char *name, Expr **args, size_t count, size_t capacity) {
+Expr *func_call(char *name, Expr **params, size_t count, size_t capacity) {
     Expr *expr = malloc_s(sizeof(Expr));
 
     expr->type = EXPR_FUNC_CALL;
     expr->func_call.name = name;
-    expr->func_call.args = args;
+    expr->func_call.params = params;
     expr->func_call.count = count;
     expr->func_call.capacity = capacity;
     return expr;
@@ -130,8 +144,11 @@ char *expr_to_string(Expr *expr) {
             break;
         case EXPR_FUNC_CALL:
             sprintf(str,
-                    "FuncCall(%s)",
-                    expr->func_call.name
+                    "FuncCall(%s, %s, %zu, %zu)",
+                    expr->func_call.name,
+                    func_params_to_string(expr->func_call.params, expr->func_call.count),
+                    expr->func_call.count,
+                    expr->func_call.capacity
             );
             break;
     }
